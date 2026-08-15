@@ -33,6 +33,10 @@
   "DeleteFailed": "❌ 削除失敗",
   "NotOperable": "操作不可",
   "ExecutionResult": "▼ 実行結果",
+  "CommandSuccess": "正常に完了しました",
+  "CommandFailed": "実行エラー",
+  "WarningOutput": "注意 / 警告",
+  "NoOutput": "(出力なし)",
   "LinkTarget": "リンク先: R:\\",
   "StatsSummary": "全 {0} 件　　🟢 安全 {1}件　🟡 注意 {2}件　⛔ 削除不可 {3}件　　🔗 リンク済み {4}件　⚡ コマンド型 {5}件"
 }

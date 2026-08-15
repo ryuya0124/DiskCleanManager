@@ -186,12 +186,43 @@ public partial class CacheFolderViewModel : ObservableObject
         {
             var result = await CommandRunnerService.RunAsync(CleanCommand);
             var sb = new System.Text.StringBuilder();
-            if (!string.IsNullOrEmpty(result.Output)) sb.AppendLine(result.Output);
-            if (!string.IsNullOrEmpty(result.Error))  sb.AppendLine("[stderr] " + result.Error);
-            sb.Append($"[Exit Code: {result.ExitCode}]");
+
+            if (result.Success)
+            {
+                sb.AppendLine($"✅ {Loc["CommandSuccess"]}");
+                if (!string.IsNullOrWhiteSpace(result.Output))
+                {
+                    sb.AppendLine(result.Output.Trim());
+                }
+                if (!string.IsNullOrWhiteSpace(result.Error))
+                {
+                    sb.AppendLine($"\n⚠️ {Loc["WarningOutput"]}:");
+                    sb.AppendLine(result.Error.Trim());
+                }
+                if (string.IsNullOrWhiteSpace(result.Output) && string.IsNullOrWhiteSpace(result.Error))
+                {
+                    sb.AppendLine(Loc["NoOutput"]);
+                }
+            }
+            else
+            {
+                sb.AppendLine($"❌ {Loc["CommandFailed"]} (Exit Code: {result.ExitCode})");
+                if (!string.IsNullOrWhiteSpace(result.Error))
+                {
+                    sb.AppendLine(result.Error.Trim());
+                }
+                if (!string.IsNullOrWhiteSpace(result.Output))
+                {
+                    sb.AppendLine(result.Output.Trim());
+                }
+            }
+
             CommandOutput = sb.ToString().Trim();
         }
-        catch (Exception ex) { CommandOutput = $"Error: {ex.Message}"; }
+        catch (Exception ex)
+        {
+            CommandOutput = $"❌ {Loc["CommandFailed"]}: {ex.Message}";
+        }
         finally
         {
             IsRunningCommand = false;

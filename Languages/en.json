@@ -33,6 +33,10 @@
   "DeleteFailed": "❌ Delete failed",
   "NotOperable": "Not Operable",
   "ExecutionResult": "▼ Execution Result",
+  "CommandSuccess": "Completed successfully",
+  "CommandFailed": "Command execution failed",
+  "WarningOutput": "Warning / Log",
+  "NoOutput": "(No output)",
   "LinkTarget": "Link Target: R:\\",
   "StatsSummary": "Total: {0} items | 🟢 Safe: {1} | 🟡 Caution: {2} | ⛔ Forbidden: {3} | 🔗 Linked: {4} | ⚡ CLI: {5}"
 }
