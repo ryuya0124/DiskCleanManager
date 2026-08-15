@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "DiskCleanManager (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "DiskCleanManager (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
