@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 
@@ -8,6 +9,7 @@ public class AppSettings
 {
     public string Theme { get; set; } = "System";      // "System", "Light", "Dark"
     public string Language { get; set; } = "System";   // "System", "ja", "en", etc.
+    public Dictionary<string, string> CustomFolderNames { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 }
 
 public static class SettingsService
@@ -32,6 +34,24 @@ public static class SettingsService
         }
     }
 
+    public static string? GetCustomFolderName(string path)
+    {
+        if (string.IsNullOrEmpty(path)) return null;
+        if (Current.CustomFolderNames != null && Current.CustomFolderNames.TryGetValue(path, out var customName))
+        {
+            return customName;
+        }
+        return null;
+    }
+
+    public static void SetCustomFolderName(string path, string customName)
+    {
+        if (string.IsNullOrEmpty(path)) return;
+        Current.CustomFolderNames ??= new(StringComparer.OrdinalIgnoreCase);
+        Current.CustomFolderNames[path] = customName;
+        Save();
+    }
+
     public static void Load()
     {
         try
@@ -40,6 +60,7 @@ public static class SettingsService
             {
                 var json = File.ReadAllText(SettingsFile);
                 _current = JsonSerializer.Deserialize<AppSettings>(json) ?? new AppSettings();
+                _current.CustomFolderNames ??= new(StringComparer.OrdinalIgnoreCase);
                 return;
             }
         }

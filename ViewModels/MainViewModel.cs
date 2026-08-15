@@ -34,8 +34,15 @@ public partial class CacheFolderViewModel : ObservableObject
     [ObservableProperty] public partial string AppFolderName { get; set; }
 
     // --- Rドライブターゲットパス（AppFolderName 変更で更新） ---
-    public string RTargetPath => System.IO.Path.Combine("R:\\", AppFolderName);
-    partial void OnAppFolderNameChanged(string value) => OnPropertyChanged(nameof(RTargetPath));
+    public string RTargetPath => System.IO.Path.Combine("R:\\", AppFolderName ?? "");
+    partial void OnAppFolderNameChanged(string value)
+    {
+        OnPropertyChanged(nameof(RTargetPath));
+        if (!string.IsNullOrEmpty(_model?.Path) && value != null)
+        {
+            SettingsService.SetCustomFolderName(_model.Path, value);
+        }
+    }
 
     // --- 安全レベル表示 ---
     public string SafetyEmoji => _model.Safety switch
@@ -112,7 +119,8 @@ public partial class CacheFolderViewModel : ObservableObject
     public CacheFolderViewModel(CacheFolder model)
     {
         _model               = model;
-        AppFolderName        = model.AppFolderName;
+        var savedName        = SettingsService.GetCustomFolderName(model.Path);
+        AppFolderName        = !string.IsNullOrEmpty(savedName) ? savedName : model.AppFolderName;
         ScannedSize          = "";
         IsScanning           = false;
         IsRunningCommand     = false;
