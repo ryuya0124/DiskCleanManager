@@ -17,10 +17,11 @@ public static class CommandRunnerService
         string command,
         CancellationToken ct = default)
     {
+        var psCommand = $"[Console]::OutputEncoding = [System.Text.Encoding]::UTF8; $OutputEncoding = [System.Text.Encoding]::UTF8; {command}";
         var psi = new ProcessStartInfo
         {
             FileName = "powershell.exe",
-            Arguments = $"-NoProfile -NonInteractive -Command \"{EscapeForPowerShell(command)}\"",
+            Arguments = $"-NoProfile -NonInteractive -Command \"{EscapeForPowerShell(psCommand)}\"",
             UseShellExecute = false,
             RedirectStandardOutput = true,
             RedirectStandardError = true,

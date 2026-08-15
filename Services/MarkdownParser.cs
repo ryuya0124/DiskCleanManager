@@ -21,10 +21,10 @@ public static class MarkdownParser
     private static readonly Dictionary<int, (string Command, string FolderName)> CommandEntries = new()
     {
         [1]  = ("Remove-Item -Recurse -Force \"$env:USERPROFILE\\.gradle\\caches\"", "Gradle_caches"),
-        [3]  = ("pip cache purge", "pip_cache"),
-        [9]  = ("uv cache clean", "uv_cache"),
-        [10] = ("npm cache clean --force", "npm-cache"),
-        [20] = ("dart pub cache clean", "Dart_PubCache"),
+        [3]  = (@"if (Get-Command pip -ErrorAction SilentlyContinue) { pip cache purge } else { Remove-Item -Path (Join-Path $env:LOCALAPPDATA 'pip\cache\*') -Recurse -Force -ErrorAction SilentlyContinue; Write-Host 'pip キャッシュを削除しました。' }", "pip_cache"),
+        [9]  = (@"if (Get-Command uv -ErrorAction SilentlyContinue) { uv cache clean } elseif (Test-Path (Join-Path $env:USERPROFILE 'AI_lllustration\Comfy Desktop\resources\bootstrap-python\uv.exe')) { & (Join-Path $env:USERPROFILE 'AI_lllustration\Comfy Desktop\resources\bootstrap-python\uv.exe') cache clean } else { Remove-Item -Path (Join-Path $env:LOCALAPPDATA 'uv\cache\*') -Recurse -Force -ErrorAction SilentlyContinue; Write-Host 'uv キャッシュを削除しました。' }", "uv_cache"),
+        [10] = (@"if (Get-Command npm -ErrorAction SilentlyContinue) { npm cache clean --force } else { Remove-Item -Path (Join-Path $env:LOCALAPPDATA 'npm-cache\*') -Recurse -Force -ErrorAction SilentlyContinue; Write-Host 'npm キャッシュを削除しました。' }", "npm-cache"),
+        [20] = (@"if (Get-Command dart -ErrorAction SilentlyContinue) { dart pub cache clean } else { Remove-Item -Path (Join-Path $env:LOCALAPPDATA 'Pub\Cache\*') -Recurse -Force -ErrorAction SilentlyContinue; Write-Host 'Pub キャッシュを削除しました。' }", "Dart_PubCache"),
     };
 
     public static List<CacheFolder> Parse(string markdownText)

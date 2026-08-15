@@ -37,7 +37,7 @@ public static class BuiltinCacheData
                 Path=U(@"AppData\Local\pip\cache"),
                 Note="pipダウンロードキャッシュ。pip cache purge で安全に削除可能。",
                 Action=ActionType.Command,
-                CleanCommand="pip cache purge",
+                CleanCommand=@"if (Get-Command pip -ErrorAction SilentlyContinue) { pip cache purge } else { Remove-Item -Path (Join-Path $env:LOCALAPPDATA 'pip\cache\*') -Recurse -Force -ErrorAction SilentlyContinue; Write-Host 'pip キャッシュを削除しました。' }",
                 AppFolderName="pip_cache" },
 
             new() { No=4,  Safety=SafetyLevel.Caution,
@@ -69,14 +69,14 @@ public static class BuiltinCacheData
                 Path=U(@"AppData\Local\uv\cache"),
                 Note="uvパッケージキャッシュ。uv cache clean で安全に削除可能。",
                 Action=ActionType.Command,
-                CleanCommand="uv cache clean",
+                CleanCommand=@"if (Get-Command uv -ErrorAction SilentlyContinue) { uv cache clean } elseif (Test-Path (Join-Path $env:USERPROFILE 'AI_lllustration\Comfy Desktop\resources\bootstrap-python\uv.exe')) { & (Join-Path $env:USERPROFILE 'AI_lllustration\Comfy Desktop\resources\bootstrap-python\uv.exe') cache clean } else { Remove-Item -Path (Join-Path $env:LOCALAPPDATA 'uv\cache\*') -Recurse -Force -ErrorAction SilentlyContinue; Write-Host 'uv キャッシュを削除しました。' }",
                 AppFolderName="uv_cache" },
 
             new() { No=10, Safety=SafetyLevel.Safe,
                 Path=U(@"AppData\Local\npm-cache"),
                 Note="npmキャッシュ。npm cache clean --force で安全に削除可能。",
                 Action=ActionType.Command,
-                CleanCommand="npm cache clean --force",
+                CleanCommand=@"if (Get-Command npm -ErrorAction SilentlyContinue) { npm cache clean --force } else { Remove-Item -Path (Join-Path $env:LOCALAPPDATA 'npm-cache\*') -Recurse -Force -ErrorAction SilentlyContinue; Write-Host 'npm キャッシュを削除しました。' }",
                 AppFolderName="npm-cache" },
 
             new() { No=11, Safety=SafetyLevel.Safe,
@@ -128,7 +128,7 @@ public static class BuiltinCacheData
                 Path=U(@"AppData\Local\Pub\Cache"),
                 Note="Dart/Pubパッケージキャッシュ。dart pub cache clean で安全に削除可能。",
                 Action=ActionType.Command,
-                CleanCommand="dart pub cache clean",
+                CleanCommand=@"if (Get-Command dart -ErrorAction SilentlyContinue) { dart pub cache clean } else { Remove-Item -Path (Join-Path $env:LOCALAPPDATA 'Pub\Cache\*') -Recurse -Force -ErrorAction SilentlyContinue; Write-Host 'Pub キャッシュを削除しました。' }",
                 AppFolderName="Dart_PubCache" },
 
             new() { No=21, Safety=SafetyLevel.Safe,
