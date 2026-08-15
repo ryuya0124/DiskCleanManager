@@ -84,6 +84,25 @@ public sealed partial class MainWindow : Window
         }
         catch { }
 
+        // アプリアイコン設定 (タスクバー / タイトルバー / Alt+Tab)
+        try
+        {
+            var iconPath = System.IO.Path.Combine(AppContext.BaseDirectory, "Assets", "AppIcon.ico");
+            if (System.IO.File.Exists(iconPath))
+            {
+                AppWindow.SetIcon(iconPath);
+            }
+            else
+            {
+                var relPath = System.IO.Path.Combine(Directory.GetCurrentDirectory(), "Assets", "AppIcon.ico");
+                if (System.IO.File.Exists(relPath))
+                {
+                    AppWindow.SetIcon(relPath);
+                }
+            }
+        }
+        catch { }
+
         FolderList.ItemsSource = ViewModel.Items;
 
         // 進捗バインド
