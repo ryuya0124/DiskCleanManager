@@ -8,6 +8,43 @@
             <ResourceDictionary.MergedDictionaries>
                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
             </ResourceDictionary.MergedDictionaries>
+
+            <ResourceDictionary.ThemeDictionaries>
+                <!-- ダークモード: 純黒ではなく見やすく上品なソフトチャコール（VS Code / Discord調） -->
+                <ResourceDictionary x:Key="Dark">
+                    <SolidColorBrush x:Key="AppMainBackgroundBrush" Color="#1E1F22" />
+                    <SolidColorBrush x:Key="AppHeaderBackgroundBrush" Color="#232428" />
+                    <SolidColorBrush x:Key="AppCardBackgroundBrush" Color="#2B2D31" />
+                    <SolidColorBrush x:Key="AppCardBorderBrush" Color="#3B3D44" />
+                    <SolidColorBrush x:Key="AppCardInnerBackgroundBrush" Color="#1E1F22" />
+                    <SolidColorBrush x:Key="AppTextPrimaryBrush" Color="#F2F3F5" />
+                    <SolidColorBrush x:Key="AppTextSecondaryBrush" Color="#B5BAC1" />
+                    <SolidColorBrush x:Key="AppTextTertiaryBrush" Color="#80848E" />
+                </ResourceDictionary>
+
+                <!-- ライトモード: 柔らかいオフホワイト調 -->
+                <ResourceDictionary x:Key="Light">
+                    <SolidColorBrush x:Key="AppMainBackgroundBrush" Color="#F3F4F6" />
+                    <SolidColorBrush x:Key="AppHeaderBackgroundBrush" Color="#FFFFFF" />
+                    <SolidColorBrush x:Key="AppCardBackgroundBrush" Color="#FFFFFF" />
+                    <SolidColorBrush x:Key="AppCardBorderBrush" Color="#E5E7EB" />
+                    <SolidColorBrush x:Key="AppCardInnerBackgroundBrush" Color="#F9FAFB" />
+                    <SolidColorBrush x:Key="AppTextPrimaryBrush" Color="#111827" />
+                    <SolidColorBrush x:Key="AppTextSecondaryBrush" Color="#4B5563" />
+                    <SolidColorBrush x:Key="AppTextTertiaryBrush" Color="#9CA3AF" />
+                </ResourceDictionary>
+
+                <ResourceDictionary x:Key="Default">
+                    <SolidColorBrush x:Key="AppMainBackgroundBrush" Color="#1E1F22" />
+                    <SolidColorBrush x:Key="AppHeaderBackgroundBrush" Color="#232428" />
+                    <SolidColorBrush x:Key="AppCardBackgroundBrush" Color="#2B2D31" />
+                    <SolidColorBrush x:Key="AppCardBorderBrush" Color="#3B3D44" />
+                    <SolidColorBrush x:Key="AppCardInnerBackgroundBrush" Color="#1E1F22" />
+                    <SolidColorBrush x:Key="AppTextPrimaryBrush" Color="#F2F3F5" />
+                    <SolidColorBrush x:Key="AppTextSecondaryBrush" Color="#B5BAC1" />
+                    <SolidColorBrush x:Key="AppTextTertiaryBrush" Color="#80848E" />
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

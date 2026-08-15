@@ -19,6 +19,7 @@ namespace DiskCleanManager.ViewModels;
 public partial class CacheFolderViewModel : ObservableObject
 {
     private readonly CacheFolder _model;
+    public LocalizationService Loc => LocalizationService.Instance;
 
     // --- 静的プロパティ ---
     public int No               => _model.No;
@@ -46,9 +47,9 @@ public partial class CacheFolderViewModel : ObservableObject
     };
     public string SafetyText => _model.Safety switch
     {
-        SafetyLevel.Safe      => "安全",
-        SafetyLevel.Caution   => "注意",
-        SafetyLevel.Forbidden => "削除不可",
+        SafetyLevel.Safe      => Loc["Safe"],
+        SafetyLevel.Caution   => Loc["Caution"],
+        SafetyLevel.Forbidden => Loc["Forbidden"],
         _                     => ""
     };
     public SolidColorBrush SafetyColor => _model.Safety switch
@@ -99,7 +100,7 @@ public partial class CacheFolderViewModel : ObservableObject
         }
     }
 
-    public string LinkStatusText => IsLinked ? "🔗 リンク済み" : "未リンク";
+    public string LinkStatusText => IsLinked ? Loc["Linked"] : Loc["Unlinked"];
     public SolidColorBrush LinkStatusColor => IsLinked
         ? new SolidColorBrush(Windows.UI.Color.FromArgb(255, 99, 102, 241))
         : new SolidColorBrush(Windows.UI.Color.FromArgb(255, 107, 114, 128));
@@ -121,6 +122,13 @@ public partial class CacheFolderViewModel : ObservableObject
         StatusMessage        = "";
         _isLinked            = false;
         RefreshLinkStatus();
+
+        Loc.PropertyChanged += (_, _) =>
+        {
+            OnPropertyChanged(nameof(SafetyText));
+            OnPropertyChanged(nameof(LinkStatusText));
+            OnPropertyChanged(nameof(Loc));
+        };
     }
 
     public void RefreshLinkStatus() => IsLinked = SymlinkService.IsSymlink(_model.Path);
@@ -137,13 +145,13 @@ public partial class CacheFolderViewModel : ObservableObject
     {
         if (!PathExists || IsScanning) return;
         IsScanning = true;
-        ScannedSize = "スキャン中...";
+        ScannedSize = Loc["Scanning"];
         try
         {
             var bytes = await FolderScanService.ScanAsync(_model.Path);
-            ScannedSize = bytes == 0 && IsLinked ? "→ RAMDisk" : FolderScanService.FormatBytes(bytes);
+            ScannedSize = bytes == 0 && IsLinked ? Loc["ToRamDisk"] : FolderScanService.FormatBytes(bytes);
         }
-        catch { ScannedSize = "エラー"; }
+        catch { ScannedSize = Loc["Error"]; }
         finally { IsScanning = false; }
     }
 
@@ -161,7 +169,7 @@ public partial class CacheFolderViewModel : ObservableObject
     public void OpenRInExplorer()
     {
         var target = RTargetPath;
-        if (!Directory.Exists(target)) { StatusMessage = $"❌ {target} が見つかりません"; return; }
+        if (!Directory.Exists(target)) { StatusMessage = $"❌ {target} (Not Found)"; return; }
         try { Process.Start(new ProcessStartInfo { FileName = "explorer.exe", Arguments = $"\"{target}\"", UseShellExecute = true }); }
         catch { }
     }
@@ -172,7 +180,7 @@ public partial class CacheFolderViewModel : ObservableObject
     {
         if (CleanCommand == null || IsRunningCommand) return;
         IsRunningCommand = true;
-        CommandOutput = "実行中...";
+        CommandOutput = Loc["Scanning"];
         CommandOutputVisible = true;
         try
         {
@@ -180,10 +188,10 @@ public partial class CacheFolderViewModel : ObservableObject
             var sb = new System.Text.StringBuilder();
             if (!string.IsNullOrEmpty(result.Output)) sb.AppendLine(result.Output);
             if (!string.IsNullOrEmpty(result.Error))  sb.AppendLine("[stderr] " + result.Error);
-            sb.Append($"[終了コード: {result.ExitCode}]");
+            sb.Append($"[Exit Code: {result.ExitCode}]");
             CommandOutput = sb.ToString().Trim();
         }
-        catch (Exception ex) { CommandOutput = $"エラー: {ex.Message}"; }
+        catch (Exception ex) { CommandOutput = $"Error: {ex.Message}"; }
         finally
         {
             IsRunningCommand = false;
@@ -201,12 +209,12 @@ public partial class CacheFolderViewModel : ObservableObject
         if (!_deleteConfirmPending)
         {
             _deleteConfirmPending = true;
-            StatusMessage = "⚠️ 削除確認: もう一度押すと「" + System.IO.Path.GetFileName(_model.Path) + "」を完全削除します";
+            StatusMessage = $"{Loc["DeleteConfirm"]} ({System.IO.Path.GetFileName(_model.Path)})";
             // 5秒後に確認フラグをリセット
             _ = Task.Delay(5000).ContinueWith(_ =>
             {
                 _deleteConfirmPending = false;
-                if (StatusMessage.StartsWith("⚠️ 削除確認"))
+                if (StatusMessage.StartsWith("⚠️"))
                     StatusMessage = "";
             }, TaskScheduler.Current);
             return;
@@ -215,11 +223,10 @@ public partial class CacheFolderViewModel : ObservableObject
         // 2クリック目：実行
         _deleteConfirmPending = false;
         IsDeleting = true;
-        StatusMessage = "削除中...";
+        StatusMessage = Loc["Scanning"];
 
         try
         {
-            // 昇格した PowerShell で削除
             var script = $"Remove-Item -Path '{_model.Path.Replace("'", "''")}' -Recurse -Force";
             var psi = new ProcessStartInfo
             {
@@ -234,16 +241,16 @@ public partial class CacheFolderViewModel : ObservableObject
 
             if (proc.ExitCode == 0)
             {
-                StatusMessage = "✓ 削除しました";
+                StatusMessage = Loc["Deleted"];
                 ScannedSize = "";
                 RefreshLinkStatus();
             }
             else
             {
-                StatusMessage = $"❌ 削除失敗（終了コード: {proc.ExitCode}）";
+                StatusMessage = $"{Loc["DeleteFailed"]} (Code: {proc.ExitCode})";
             }
         }
-        catch (Exception ex) { StatusMessage = $"❌ 削除エラー: {ex.Message}"; }
+        catch (Exception ex) { StatusMessage = $"❌ {ex.Message}"; }
         finally { IsDeleting = false; }
     }
 
@@ -252,16 +259,18 @@ public partial class CacheFolderViewModel : ObservableObject
     public async Task CreateSymlinkAsync()
     {
         if (IsLinked) return;
-        StatusMessage = "処理中... （UACダイアログが出たら「はい」を押してください）";
+        StatusMessage = "UAC...";
         var result = await SymlinkService.CreateSymlinkAsync(_model.Path, AppFolderName);
         StatusMessage = result.Message;
         RefreshLinkStatus();
-        if (IsLinked) ScannedSize = "→ RAMDisk";
+        if (IsLinked) ScannedSize = Loc["ToRamDisk"];
     }
 }
 
 public partial class MainViewModel : ObservableObject
 {
+    public LocalizationService Loc => LocalizationService.Instance;
+
     [ObservableProperty] public partial ObservableCollection<CacheFolderViewModel> Items        { get; set; }
     [ObservableProperty] public partial bool IsScanningAll { get; set; }
     [ObservableProperty] public partial int  ScanProgress  { get; set; }
@@ -278,6 +287,11 @@ public partial class MainViewModel : ObservableObject
 
         foreach (var f in BuiltinCacheData.GetAll())
             Items.Add(new CacheFolderViewModel(f));
+
+        Loc.PropertyChanged += (_, _) =>
+        {
+            OnPropertyChanged(nameof(Loc));
+        };
     }
 
     public async Task ScanAllAsync()

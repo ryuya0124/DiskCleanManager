@@ -4,69 +4,140 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     Title="Disk Clean Manager">
 
-    <Grid>
+    <Grid x:Name="RootGrid"
+          MinWidth="860"
+          Background="{ThemeResource AppMainBackgroundBrush}">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
+            <RowDefinition Height="50" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <!-- ===== ヘッダー ===== -->
-        <Border Grid.Row="0"
-                Background="{ThemeResource SystemControlAcrylicWindowBrush}"
-                Padding="20,14">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
+        <!-- ===== カスタムタイトルバー (Row 0) ===== -->
+        <Grid Grid.Row="0"
+              x:Name="HeaderGrid"
+              Background="{ThemeResource AppHeaderBackgroundBrush}"
+              BorderBrush="{ThemeResource AppCardBorderBrush}"
+              BorderThickness="0,0,0,1"
+              Padding="16,0,8,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
 
-                <StackPanel Grid.Column="0" Spacing="2">
-                    <TextBlock Text="💾 Disk Clean Manager"
-                               FontSize="22" FontWeight="Bold"
-                               Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
-                    <TextBlock Text="RAMDisk シンボリックリンク管理 &amp; キャッシュクリーナー"
-                               FontSize="12"
-                               Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+            <!-- アプリアイコン + タイトル -->
+            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                <TextBlock Text="💾" FontSize="20" VerticalAlignment="Center" />
+                <StackPanel VerticalAlignment="Center" Spacing="1">
+                    <TextBlock x:Name="TitleText"
+                               Text="Disk Clean Manager"
+                               FontSize="14" FontWeight="SemiBold"
+                               Foreground="{ThemeResource AppTextPrimaryBrush}" />
+                    <TextBlock x:Name="SubtitleText"
+                               Text="RAMDisk &amp; Cache Cleaner"
+                               FontSize="10"
+                               Foreground="{ThemeResource AppTextSecondaryBrush}" />
                 </StackPanel>
+            </StackPanel>
 
-                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                    <Button x:Name="ScanAllButton"
-                            Content="🔍 全件スキャン"
-                            Click="ScanAllButton_Click"
-                            Style="{ThemeResource AccentButtonStyle}" />
-                    <Button x:Name="RefreshLinksButton"
-                            Content="🔄 リンク状態更新"
-                            Click="RefreshLinksButton_Click" />
-                </StackPanel>
-            </Grid>
-        </Border>
+            <!-- ウィンドウドラッグ可能エリア (中央) -->
+            <Border Grid.Column="1"
+                    x:Name="TitleBarDragArea"
+                    Background="Transparent"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch" />
 
-        <!-- ===== プログレス + 統計バー ===== -->
+            <!-- アクションボタン群 (キャプションボタンと被らないよう右マージンを確保) -->
+            <StackPanel Grid.Column="2"
+                        x:Name="HeaderButtonPanel"
+                        Orientation="Horizontal"
+                        Spacing="8"
+                        VerticalAlignment="Center"
+                        Margin="0,0,145,0">
+
+                <Button x:Name="ScanAllButton"
+                        Content="🔍 全件スキャン"
+                        Click="ScanAllButton_Click"
+                        Style="{ThemeResource AccentButtonStyle}"
+                        FontSize="12" Padding="12,6" />
+
+                <Button x:Name="RefreshLinksButton"
+                        Content="🔄 リンク状態更新"
+                        Click="RefreshLinksButton_Click"
+                        FontSize="12" Padding="10,6" />
+
+                <!-- 設定ボタン（フライアウト） -->
+                <Button x:Name="SettingsButton"
+                        Content="⚙"
+                        ToolTipService.ToolTip="設定 / Settings"
+                        FontSize="14" Padding="10,5">
+                    <Button.Flyout>
+                        <Flyout x:Name="SettingsFlyout">
+                            <StackPanel Spacing="14" Width="260" Padding="6">
+                                <TextBlock x:Name="SettingsHeader" Text="⚙ 設定" FontWeight="Bold" FontSize="15"
+                                           Foreground="{ThemeResource AppTextPrimaryBrush}" />
+
+                                <!-- テーマ設定 -->
+                                <StackPanel Spacing="6">
+                                    <TextBlock x:Name="ThemeLabel" Text="テーマ" FontSize="12"
+                                               Foreground="{ThemeResource AppTextSecondaryBrush}" />
+                                    <ComboBox x:Name="ThemeComboBox"
+                                              HorizontalAlignment="Stretch"
+                                              SelectionChanged="ThemeComboBox_SelectionChanged">
+                                        <ComboBoxItem Content="システム設定に同期" Tag="System" />
+                                        <ComboBoxItem Content="ライト" Tag="Light" />
+                                        <ComboBoxItem Content="ダーク (ソフトチャコール)" Tag="Dark" />
+                                    </ComboBox>
+                                </StackPanel>
+
+                                <!-- 言語設定 -->
+                                <StackPanel Spacing="6">
+                                    <TextBlock x:Name="LanguageLabel" Text="言語" FontSize="12"
+                                               Foreground="{ThemeResource AppTextSecondaryBrush}" />
+                                    <ComboBox x:Name="LanguageComboBox"
+                                              HorizontalAlignment="Stretch"
+                                              SelectionChanged="LanguageComboBox_SelectionChanged" />
+                                </StackPanel>
+                            </StackPanel>
+                        </Flyout>
+                    </Button.Flyout>
+                </Button>
+
+                <!-- GitHub / ヘルプ -->
+                <Button x:Name="HelpButton"
+                        Content="GitHub ↗"
+                        Click="HelpButton_Click"
+                        ToolTipService.ToolTip="GitHub: https://github.com/ryuya0124/DiskCleanManager"
+                        FontSize="12" Padding="10,6" />
+            </StackPanel>
+        </Grid>
+
+        <!-- ===== プログレス + 統計バー (Row 1) ===== -->
         <StackPanel Grid.Row="1" Spacing="0">
             <ProgressBar x:Name="ScanProgressBar"
                          Visibility="Collapsed"
                          Height="4" />
-            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                    BorderThickness="0,1,0,1"
-                    Padding="20,8">
+            <Border Background="{ThemeResource AppHeaderBackgroundBrush}"
+                    BorderBrush="{ThemeResource AppCardBorderBrush}"
+                    BorderThickness="0,0,0,1"
+                    Padding="16,8">
                 <TextBlock x:Name="StatsText"
                            FontSize="12"
-                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                           Foreground="{ThemeResource AppTextSecondaryBrush}" />
             </Border>
         </StackPanel>
 
-        <!-- ===== フォルダ一覧 ===== -->
-        <ScrollViewer Grid.Row="2" Padding="12,8,12,12">
+        <!-- ===== フォルダ一覧 (Row 2) ===== -->
+        <ScrollViewer Grid.Row="2" Padding="16,10,16,16">
             <ItemsControl x:Name="FolderList">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Border Margin="0,4,0,4"
+                        <Border Margin="0,4,0,6"
                                 CornerRadius="8"
-                                Padding="14,12"
-                                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                Padding="16,14"
+                                Background="{ThemeResource AppCardBackgroundBrush}"
+                                BorderBrush="{ThemeResource AppCardBorderBrush}"
                                 BorderThickness="1">
                             <Grid>
                                 <Grid.ColumnDefinitions>
@@ -78,16 +149,16 @@
                                 <!-- No -->
                                 <TextBlock Grid.Column="0"
                                            Text="{Binding No}"
-                                           FontSize="11"
-                                           Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                                           FontSize="12"
+                                           Foreground="{ThemeResource AppTextTertiaryBrush}"
                                            VerticalAlignment="Top"
                                            Margin="0,4,0,0" />
 
                                 <!-- ===== メイン情報 ===== -->
-                                <StackPanel Grid.Column="1" Spacing="5">
+                                <StackPanel Grid.Column="1" Spacing="7" Margin="0,0,12,0">
 
                                     <!-- バッジ行 -->
-                                    <StackPanel Orientation="Horizontal" Spacing="6" FlowDirection="LeftToRight">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
                                         <!-- 安全レベルバッジ -->
                                         <Border CornerRadius="4" Padding="6,2"
                                                 Background="{Binding SafetyColor}">
@@ -108,97 +179,111 @@
                                         <!-- コマンド型バッジ -->
                                         <Border Visibility="{Binding CmdPanelVisible}"
                                                 CornerRadius="4" Padding="6,2"
-                                                Background="{ThemeResource SystemFillColorAttentionBackgroundBrush}">
+                                                Background="#E0A82E">
                                             <TextBlock FontSize="11" FontWeight="SemiBold"
-                                                       Foreground="{ThemeResource SystemFillColorAttentionBrush}"
-                                                       Text="⚡ CLIコマンド" />
+                                                       Foreground="#FFFFFF"
+                                                       Text="{Binding Loc[CliCommand]}" />
                                         </Border>
                                     </StackPanel>
 
                                     <!-- パス（エクスプローラーボタン付き） -->
-                                    <StackPanel Orientation="Horizontal" Spacing="6">
-                                        <TextBlock Text="{Binding Path}"
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0"
+                                                   Text="{Binding Path}"
                                                    FontSize="12"
                                                    FontFamily="Cascadia Code, Consolas, monospace"
                                                    TextWrapping="Wrap"
                                                    IsTextSelectionEnabled="True"
-                                                   Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                                                   Foreground="{ThemeResource AppTextPrimaryBrush}"
                                                    VerticalAlignment="Center"
-                                                   MaxWidth="600" />
-                                        <Button Command="{Binding OpenInExplorerCommand}"
-                                                ToolTipService.ToolTip="エクスプローラーで開く"
+                                                   Margin="0,0,8,0" />
+                                        <Button Grid.Column="1"
+                                                Command="{Binding OpenInExplorerCommand}"
+                                                ToolTipService.ToolTip="{Binding Loc[OpenExplorer]}"
                                                 Padding="6,3" FontSize="11"
+                                                VerticalAlignment="Top"
                                                 Content="📂" />
-                                    </StackPanel>
+                                    </Grid>
 
                                     <!-- 備考 -->
                                     <TextBlock Text="{Binding Note}"
                                                FontSize="12" TextWrapping="Wrap"
-                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                               Foreground="{ThemeResource AppTextSecondaryBrush}" />
 
                                     <!-- ===== コマンド実行型パネル ===== -->
-                                    <StackPanel Visibility="{Binding CmdPanelVisible}" Spacing="5">
-                                        <Border Background="{ThemeResource SystemFillColorCriticalBackgroundBrush}"
-                                                CornerRadius="4" Padding="8,4">
+                                    <StackPanel Visibility="{Binding CmdPanelVisible}" Spacing="6">
+                                        <Border Background="{ThemeResource AppCardInnerBackgroundBrush}"
+                                                BorderBrush="{ThemeResource AppCardBorderBrush}"
+                                                BorderThickness="1"
+                                                CornerRadius="4" Padding="8,5">
                                             <TextBlock Text="{Binding CleanCommand}"
                                                        FontSize="12"
                                                        FontFamily="Cascadia Code, Consolas, monospace"
-                                                       Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+                                                       Foreground="#E57373"
                                                        TextWrapping="Wrap"
                                                        IsTextSelectionEnabled="True" />
                                         </Border>
+                                        <!-- 出力（折りたたみ） -->
                                         <Expander Visibility="{Binding CommandOutputVisibility, Mode=OneWay}"
-                                                  Header="▼ 実行結果"
+                                                  Header="{Binding Loc[ExecutionResult]}"
                                                   IsExpanded="True">
-                                            <Border Background="{ThemeResource SystemFillColorNeutralBackgroundBrush}"
+                                            <Border Background="{ThemeResource AppCardInnerBackgroundBrush}"
+                                                    BorderBrush="{ThemeResource AppCardBorderBrush}"
+                                                    BorderThickness="1"
                                                     CornerRadius="4" Padding="8">
                                                 <TextBlock Text="{Binding CommandOutput, Mode=OneWay}"
                                                            FontSize="11"
                                                            FontFamily="Cascadia Code, Consolas, monospace"
                                                            TextWrapping="Wrap"
+                                                           Foreground="{ThemeResource AppTextPrimaryBrush}"
                                                            IsTextSelectionEnabled="True" />
                                             </Border>
                                         </Expander>
                                     </StackPanel>
 
                                     <!-- ===== シンボリックリンク型パネル ===== -->
-                                    <StackPanel Visibility="{Binding SymPanelVisible}" Spacing="5">
-                                        <!-- Rフォルダ名（編集可能） -->
-                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <StackPanel Visibility="{Binding SymPanelVisible}" Spacing="6">
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
                                             <TextBlock Text="R:\"
                                                        FontSize="12"
                                                        FontFamily="Cascadia Code, Consolas, monospace"
-                                                       Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                                                       Foreground="{ThemeResource AppTextTertiaryBrush}"
                                                        VerticalAlignment="Center" />
                                             <TextBox Text="{Binding AppFolderName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                      FontSize="12"
                                                      FontFamily="Cascadia Code, Consolas, monospace"
-                                                     PlaceholderText="フォルダ名"
+                                                     PlaceholderText="{Binding Loc[FolderNamePlaceholder]}"
                                                      MinWidth="200"
-                                                     ToolTipService.ToolTip="Rドライブのターゲットフォルダ名（編集可能）" />
+                                                     MaxWidth="320"
+                                                     ToolTipService.ToolTip="R:\ ターゲットフォルダ名" />
                                             <Button Command="{Binding OpenRInExplorerCommand}"
-                                                    ToolTipService.ToolTip="Rドライブのフォルダを開く"
-                                                    Padding="6,3" FontSize="11"
-                                                    Content="📂 R:" />
+                                                    ToolTipService.ToolTip="{Binding Loc[OpenRExplorer]}"
+                                                    Padding="8,4" FontSize="11"
+                                                    Content="📂 R:\" />
                                         </StackPanel>
                                     </StackPanel>
 
-                                    <!-- ===== ステータスメッセージ（共通） ===== -->
+                                    <!-- ===== ステータスメッセージ ===== -->
                                     <TextBlock Visibility="{Binding StatusMessageVisibility, Mode=OneWay}"
                                                Text="{Binding StatusMessage, Mode=OneWay}"
                                                FontSize="12" TextWrapping="Wrap"
-                                               Foreground="{ThemeResource SystemFillColorCautionBrush}" />
+                                               Foreground="#FFA726" />
 
                                 </StackPanel>
 
                                 <!-- ===== 右側ボタン群 ===== -->
-                                <StackPanel Grid.Column="2" Spacing="5"
-                                            VerticalAlignment="Top" Margin="12,0,0,0" MinWidth="130">
+                                <StackPanel Grid.Column="2" Spacing="6"
+                                            VerticalAlignment="Top" MinWidth="130">
 
                                     <!-- 容量 + スキャン -->
                                     <StackPanel Spacing="3" HorizontalAlignment="Right">
                                         <TextBlock Text="{Binding ScannedSize, Mode=OneWay}"
                                                    FontSize="13" FontWeight="SemiBold"
+                                                   Foreground="{ThemeResource AppTextPrimaryBrush}"
                                                    HorizontalAlignment="Right" />
                                         <Button Content="📏 スキャン"
                                                 FontSize="12"
@@ -207,36 +292,36 @@
                                                 IsEnabled="{Binding ScanButtonEnabled, Mode=OneWay}" />
                                     </StackPanel>
 
-                                    <!-- コマンド実行ボタン（Command型） -->
+                                    <!-- コマンド実行ボタン -->
                                     <Button Visibility="{Binding CmdPanelVisible}"
                                             Command="{Binding RunCleanCommandCommand}"
                                             IsEnabled="{Binding CmdButtonEnabled, Mode=OneWay}"
                                             Style="{ThemeResource AccentButtonStyle}"
                                             HorizontalAlignment="Stretch">
-                                        <TextBlock Text="▶ コマンド実行" FontSize="12" />
+                                        <TextBlock Text="{Binding Loc[RunCommand]}" FontSize="12" />
                                     </Button>
 
-                                    <!-- シンボリックリンク作成（Symlink型） -->
+                                    <!-- シンボリックリンク作成 -->
                                     <Button Visibility="{Binding SymPanelVisible}"
                                             Command="{Binding CreateSymlinkCommand}"
                                             IsEnabled="{Binding LinkButtonEnabled, Mode=OneWay}"
                                             HorizontalAlignment="Stretch">
-                                        <TextBlock Text="🔗 リンク作成" FontSize="12" />
+                                        <TextBlock Text="{Binding Loc[CreateLink]}" FontSize="12" />
                                     </Button>
 
-                                    <!-- キャッシュ削除（削除不可以外） -->
+                                    <!-- キャッシュ削除 -->
                                     <Button Visibility="{Binding ActionablePanelVisible}"
                                             Command="{Binding DeleteCacheCommand}"
                                             IsEnabled="{Binding DeleteButtonEnabled, Mode=OneWay}"
                                             HorizontalAlignment="Stretch">
-                                        <TextBlock Text="🗑️ キャッシュ削除" FontSize="12" />
+                                        <TextBlock Text="{Binding Loc[DeleteCache]}" FontSize="12" />
                                     </Button>
 
                                     <!-- 削除不可ラベル -->
                                     <TextBlock Visibility="{Binding ForbPanelVisible}"
-                                               Text="操作不可"
+                                               Text="{Binding Loc[NotOperable]}"
                                                FontSize="12"
-                                               Foreground="{ThemeResource TextFillColorDisabledBrush}"
+                                               Foreground="{ThemeResource AppTextTertiaryBrush}"
                                                HorizontalAlignment="Right" />
 
                                 </StackPanel>
